@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Лицензия — Mail Gateway{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>
+    Состояние лицензии
+    {% if license.valid %}
+      <span class="badge">действительна</span>
+    {% else %}
+      <span class="badge warn">{{ license.reason }}</span>
+    {% endif %}
+  </h2>
+
+  {% if not license.valid %}
+  <div class="notice error">
+    {{ license.reason }}. Приём и отправка почты приостановлены: входящие
+    письма отклоняются с временной ошибкой (отправители повторят доставку),
+    исходящие ждут в очереди. Остальное работает. Установите действующую
+    лицензию — почта пойдёт сразу, без перезапуска:
+    <a href="{{ licensing_url }}">{{ licensing_url }}</a>
+  </div>
+  {% elif license.days_remaining is not none and license.days_remaining <= 30 %}
+  <div class="notice error">
+    Лицензия истекает через {{ license.days_remaining }} дн. По окончании срока
+    приём и отправка почты остановятся — продлите заранее:
+    <a href="{{ licensing_url }}">{{ licensing_url }}</a>
+  </div>
+  {% endif %}
+
+  <dl class="meta">
+    <dt>Лицензиат</dt><dd>{{ license.company }}</dd>
+    {% if license.data %}
+    <dt>Выдана</dt><dd>{{ license.data.issue_date[:10] }}</dd>
+    <dt>Действует до</dt><dd>{{ license.data.expiry_date[:10] }}</dd>
+    {% if license.days_remaining is not none %}
+    <dt>Осталось</dt><dd>{{ license.days_remaining }} дн.</dd>
+    {% endif %}
+    {% endif %}
+    <dt>Доменов</dt>
+    <dd>
+      {{ domains_used }}{% if license.max_domains is not none %} из {{ license.max_domains }} по лицензии{% endif %}
+    </dd>
+  </dl>
+
+  <p class="muted hint">
+    Действующая лицензия обязательна для приёма и отправки почты: без неё
+    программа работает, но письма не ходят. Число зарегистрированных доменов
+    ограничено полем «Доменов по лицензии»; количество писем, ящиков и
+    обращений к API не ограничивается и не тарифицируется.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Установить файл лицензии</h2>
+  <form method="post" action="/admin/license" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="row" style="grid-template-columns: 2fr auto">
+      <div class="field">
+        <label for="file">Файл .lic, полученный от исполнителя</label>
+        <input type="file" id="file" name="file" accept=".lic" required>
+      </div>
+      <button type="submit">Установить</button>
+    </div>
+  </form>
+  <p class="muted hint">
+    Файл проверяется до установки: повреждённая или чужая лицензия не
+    затронет текущую.
+  </p>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Клиенты — Mail Gateway{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Новый клиент</h2>
+  <form method="post" action="/admin/clients">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="row" style="grid-template-columns: 2fr auto">
+      <div class="field">
+        <label for="name">Название организации</label>
+        <input type="text" id="name" name="name" placeholder="ТОО «Ромашка»" required>
+      </div>
+      <button type="submit">Создать</button>
+    </div>
+  </form>
+  <p class="muted hint">
+    Клиент — это организация, которой принадлежат домены, ящики и API-ключи.
+    Ключ одного клиента не видит данных другого.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Клиенты — {{ total }}</h2>
+  {% if clients %}
+  <table>
+    <thead>
+      <tr><th>Название</th><th>Домены</th><th>Ключи</th><th>Ящики</th><th>Состояние</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for client, counts in clients %}
+      <tr>
+        <td><a class="plain" href="/admin/clients/{{ client.id }}">{{ client.name }}</a></td>
+        <td>{{ counts.domains }}</td>
+        <td>{{ counts.keys }}</td>
+        <td>{{ counts.mailboxes }}</td>
+        <td>
+          {% if client.is_active %}<span class="badge">активен</span>
+          {% else %}<span class="badge off">отключён</span>{% endif %}
+        </td>
+        <td style="text-align:right">
+          <a href="/admin/clients/{{ client.id }}">Открыть</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">Клиентов пока нет.</p>
+  {% endif %}
+</div>
+{% endblock %}

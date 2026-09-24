@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Ключ выпущен — Mail Gateway{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Ключ «{{ api_key.name }}» для клиента «{{ client.name }}» выпущен</h2>
+  <div class="notice error" style="margin-top:12px">
+    Скопируйте значение сейчас. Оно показывается один-единственный раз:
+    в базе хранится только слепок, и восстановить ключ после ухода с этой
+    страницы невозможно.
+  </div>
+  <p style="font-size:18px">
+    <code id="token" style="user-select:all; overflow-wrap:anywhere">{{ raw_token }}</code>
+  </p>
+  <button id="copy" type="button">Скопировать</button>
+  <p class="muted hint">
+    Использование: заголовок <code>Authorization: Bearer &lt;ключ&gt;</code>
+    в каждом запросе к API. Если ключ утёк — отзовите его на странице клиента
+    и выпустите новый.
+  </p>
+</div>
+
+<p><a href="/admin/clients/{{ client.id }}">← Назад к клиенту «{{ client.name }}»</a></p>
+
+<script>
+  document.getElementById("copy").addEventListener("click", function () {
+    navigator.clipboard.writeText(document.getElementById("token").textContent).then(function () {
+      document.getElementById("copy").textContent = "Скопировано";
+    });
+  });
+</script>
+{% endblock %}

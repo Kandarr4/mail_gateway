@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Резервные копии — Mail Gateway{% endblock %}
+
+{% macro mb(value) -%}
+{{ (value / 1024 / 1024) | round(1) }} МБ
+{%- endmacro %}
+
+{% block content %}
+<div class="card">
+  <h2>Настройки</h2>
+  <form method="post" action="/admin/backup/settings">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    {% for item in definitions %}
+    <div class="field" style="margin-bottom:16px">
+      {% if item.kind.__name__ == "bool" %}
+      <div class="checkbox">
+        <input type="checkbox" id="{{ item.key }}" name="{{ item.key }}" value="true"
+               {% if values[item.key] %}checked{% endif %}>
+        <label for="{{ item.key }}" style="margin:0">{{ item.title }}</label>
+      </div>
+      {% else %}
+      <label for="{{ item.key }}">{{ item.title }}{% if item.unit %}, {{ item.unit }}{% endif %}</label>
+      <input type="text" id="{{ item.key }}" name="{{ item.key }}"
+             value="{{ values[item.key] }}" inputmode="numeric" style="max-width:200px">
+      {% endif %}
+      {% if item.hint %}<p class="muted hint" style="margin-top:6px">{{ item.hint }}</p>{% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit">Сохранить</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Место</h2>
+  <dl class="meta">
+    <dt>Каталог</dt><dd class="muted">{{ directory }}</dd>
+    <dt>Занято снимками</dt>
+    <dd>
+      {{ mb(used) }} из {{ mb(limit) }}
+      {% if used > limit %}<span class="badge warn">лимит превышен</span>{% endif %}
+    </dd>
+    {% if free is not none %}
+    <dt>Свободно на диске</dt>
+    <dd {% if free < limit %}class="muted"{% endif %}>
+      {{ mb(free) }}
+      {% if free < limit %}
+      <span class="badge warn">меньше лимита</span>
+      {% endif %}
+    </dd>
+    {% endif %}
+  </dl>
+  <form method="post" action="/admin/backup/run" style="margin-top:16px">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit">Создать снимок сейчас</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Снимки — {{ snapshots | length }}</h2>
+  {% if snapshots %}
+  <table>
+    <thead>
+      <tr><th>Файл</th><th>Создан</th><th>Размер</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for item in snapshots %}
+      <tr>
+        <td><a class="plain" href="/admin/backup/{{ item.name }}">{{ item.name }}</a></td>
+        <td class="muted">{{ item.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+        <td class="muted">{{ mb(item.size) }}</td>
+        <td style="text-align:right">
+          <form method="post" action="/admin/backup/{{ item.name }}/delete" style="margin:0">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="link" type="submit"
+                    data-confirm="Удалить снимок {{ item.name }}?">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">Снимков пока нет. Первый будет создан при очередном обслуживании.</p>
+  {% endif %}
+
+  <p class="muted hint">
+    В снимок входит база данных: письма, ящики, учётные записи и настройки.
+    Вложения в него не включаются намеренно — это файлы, которые пишутся один
+    раз и не меняются, и копия каждого из них в каждом снимке умножала бы объём
+    без пользы. Синхронизируйте их отдельно:
+    <code>robocopy "data\attachments" "D:\резерв\attachments" /MIR</code>
+  </p>
+</div>
+
+<script>
+  document.querySelectorAll("button[data-confirm]").forEach(function (button) {
+    button.addEventListener("click", function (event) {
+      if (!confirm(button.dataset.confirm)) {
+        event.preventDefault();
+      }
+    });
+  });
+</script>
+{% endblock %}

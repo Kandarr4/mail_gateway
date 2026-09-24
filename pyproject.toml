@@ -1,0 +1,71 @@
+# Конфигурация инструментов в одном месте. Зависимости сознательно оставлены в
+# requirements.txt: на него смотрят run.bat, установщик и mail_gateway.spec, и
+# дублировать их здесь означало бы рано или поздно разойтись с поставкой.
+
+[project]
+name = "mail-gateway"
+version = "1.0.0"
+description = "Автономный почтовый шлюз: приём почты по SMTP и выдача через HTTP API"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Valentin Bortnikov (Somnium)" }]
+requires-python = ">=3.11"
+dynamic = ["dependencies"]
+classifiers = [
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Communications :: Email",
+    "Topic :: Communications :: Email :: Mail Transport Agents",
+    "Framework :: FastAPI",
+    "Environment :: Win32 (MS Windows)",
+]
+
+[project.urls]
+Homepage = "https://somnium.kz"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools]
+packages = ["app", "app.api", "app.api.routes", "app.services", "app.web", "app.workers", "tray"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "C4", "N", "S", "BLE", "ASYNC", "RUF"]
+# B008 — вызов в аргументе по умолчанию: это штатная запись зависимостей FastAPI.
+# E501 — длину строк держит форматтер, дублировать проверку незачем.
+# RUF001-003 — кириллица в строках и комментариях: для этого проекта норма.
+# N818 — имена NotFound/Conflict повторяют словарь HTTP, как в werkzeug; суффикс Error здесь только мешает.
+ignore = ["B008", "E501", "N818", "RUF001", "RUF002", "RUF003"]
+
+[tool.ruff.lint.per-file-ignores]
+# E402 и BLE001 в остальных местах закрыты пометками noqa с причиной
+# прямо в строке — там она видна тому, кто читает код.
+
+# S101 — assert: в pytest это способ выразить проверку, а не забытая отладка.
+# S105/S603/RUF012 — тестовые пароли, запуск сборки и заглушки.
+# S104/S108 — в тестах это проверяемые значения настроек, а не боевая привязка.
+"tests/*.py" = ["S101", "S104", "S105", "S108", "S603", "RUF012"]
+"smoke_test.py" = ["S101", "BLE001"]
+# Диагностика приёма: смысл в том, чтобы сообщить о любом сбое, а не упасть самой.
+"check_inbound.py" = ["S101", "BLE001"]
+# icacls и сборщики зовутся списком аргументов, без shell и без ввода извне.
+"app/services/keygen.py" = ["S603", "S607"]
+"build.py" = ["S603", "S607"]
+# Заставка и запуск соседнего exe: random — анимация, путь собирается самой программой.
+"tray/welcome_overlay.py" = ["S311"]
+"tray/app.py" = ["S606"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = ["ignore::DeprecationWarning"]
+addopts = "-q"

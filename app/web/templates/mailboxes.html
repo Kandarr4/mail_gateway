@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Ящики — Mail Gateway{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Добавить или изменить ящик</h2>
+  <form method="post" action="/admin/mailboxes">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="row">
+      <div class="field">
+        <label for="address">Адрес</label>
+        <input type="email" id="address" name="address" placeholder="sales@{{ domain }}" required>
+      </div>
+      <div class="field">
+        <label for="display_name">Название</label>
+        <input type="text" id="display_name" name="display_name" placeholder="Отдел продаж">
+      </div>
+      <div class="field">
+        <label for="external_id">Внешний ID</label>
+        <input type="text" id="external_id" name="external_id" placeholder="42">
+      </div>
+      <div class="checkbox">
+        <input type="checkbox" id="is_active" name="is_active" value="true" checked>
+        <label for="is_active" style="margin:0">Активен</label>
+      </div>
+      <button type="submit">Сохранить</button>
+    </div>
+  </form>
+  <p class="muted hint">
+    Повторное сохранение существующего адреса перезаписывает его данные.
+    Письма для неактивного ящика отклоняются на стадии приёма.
+    Домен адреса должен быть заранее зарегистрирован за клиентом на странице
+    <a href="/admin/clients">Клиенты</a> — ящик автоматически принадлежит
+    владельцу домена.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Ящики — {{ total }}</h2>
+  {% if mailboxes %}
+  <table>
+    <thead>
+      <tr><th>Адрес</th><th>Название</th><th>Внешний ID</th><th>Состояние</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for mailbox in mailboxes %}
+      <tr>
+        <td>{{ mailbox.address }}</td>
+        <td>{{ mailbox.display_name or "—" }}</td>
+        <td>{{ mailbox.external_id or "—" }}</td>
+        <td>
+          {% if mailbox.is_active %}<span class="badge">активен</span>
+          {% else %}<span class="badge off">отключён</span>{% endif %}
+        </td>
+        <td style="text-align:right">
+          <form method="post" action="/admin/mailboxes/{{ mailbox.address }}/delete" style="margin:0">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="link" type="submit"
+                    data-confirm="Удалить ящик {{ mailbox.address }}?">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">Ящиков пока нет. Пока адрес не заведён, письма для него отклоняются
+     с ответом «550 No such user here».</p>
+  {% endif %}
+</div>
+
+<script>
+  // Подтверждение удаления. Отдельным обработчиком, а не атрибутом onsubmit,
+  // чтобы страница работала при запрете встроенных обработчиков в CSP.
+  document.querySelectorAll("button[data-confirm]").forEach(function (button) {
+    button.addEventListener("click", function (event) {
+      if (!confirm(button.dataset.confirm + " Полученные письма останутся в базе.")) {
+        event.preventDefault();
+      }
+    });
+  });
+</script>
+{% endblock %}

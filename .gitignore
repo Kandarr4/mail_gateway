@@ -1,0 +1,51 @@
+# --- окружение и кеши ---
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- настройки с секретами ---
+# В репозитории живёт только .env.example с пустыми значениями.
+.env
+.env.bak*
+
+# --- реквизиты, цены и смета: коммерческие данные, не для публикации ---
+# Образец с обезличенными значениями — docs/generate/config.py.
+docs/generate/config_local.py
+docs/Смета.md
+
+# --- рантайм-данные ---
+# data/ — вложения, резервные копии, журналы, ключи шифрования и DKIM.
+data/
+*.db
+*.db-wal
+*.db-shm
+schema.lock
+Users836D~1AppDataLocalTemp2/
+
+# --- создаётся manage.py dns-records под конкретный домен ---
+dns_record.txt
+
+# --- выданные лицензии ---
+*.lic
+
+# --- сборка ---
+build/
+dist/
+
+# --- создаётся installer/make_license.py, не править руками ---
+installer/LICENSE.txt
+installer/version.iss
+
+# --- создаётся make_docs.bat из docs/generate/*.py ---
+docs/*.docx
+
+# --- рабочие заметки и исходники артефактов, не относящиеся к продукту ---
+# Runbook боевой площадки: внутренние адреса, схема прокси и имя машины —
+# карта инфраструктуры, которая в открытом репозитории ни к чему.
+# Общая же процедура есть в docs/README.md, раздел «Развёртывание в бой».
+docs/Развёртывание.md
+docs/skil-good-app.md
+tray/ChatGPT-Image-*.ico

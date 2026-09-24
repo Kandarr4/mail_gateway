@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}{{ client.name }} — Mail Gateway{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>
+    {{ client.name }}
+    {% if client.is_active %}<span class="badge">активен</span>
+    {% else %}<span class="badge off">отключён</span>{% endif %}
+  </h2>
+  <p class="muted">
+    Доменов: {{ counts.domains }} · Ключей: {{ counts.keys }} · Ящиков: {{ counts.mailboxes }}
+  </p>
+  <div style="display:flex; gap:12px">
+    <form method="post" action="/admin/clients/{{ client.id }}/toggle" style="margin:0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit">{% if client.is_active %}Отключить{% else %}Включить{% endif %}</button>
+    </form>
+    <form method="post" action="/admin/clients/{{ client.id }}/delete" style="margin:0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="link" type="submit"
+              data-confirm="Удалить клиента {{ client.name }} со всеми доменами, ключами и ящиками?">
+        Удалить клиента</button>
+    </form>
+  </div>
+  <p class="muted hint">
+    Отключение мгновенно отзывает доступ всех ключей клиента, не удаляя данных.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Домены</h2>
+  {% if domains %}
+  <table>
+    <thead>
+      <tr><th>Домен</th><th>DKIM</th><th>Селектор</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for domain in domains %}
+      <tr>
+        <td>{{ domain.name }}</td>
+        <td>
+          {% if domain.dkim_private_key_file %}
+            <span class="badge">подписывается</span>
+          {% else %}
+            <span class="badge warn">без подписи</span>
+          {% endif %}
+        </td>
+        <td>{{ domain.dkim_selector }}</td>
+        <td style="text-align:right">
+          <form method="post" action="/admin/domains/{{ domain.id }}/delete" style="margin:0">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="link" type="submit"
+                    data-confirm="Удалить домен {{ domain.name }}?">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="padding-top:0">
+          <form method="post" action="/admin/domains/{{ domain.id }}/dkim">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="row" style="grid-template-columns: 2fr 1fr auto">
+              <div class="field">
+                <label>Файл закрытого ключа DKIM</label>
+                <input type="text" name="private_key_file"
+                       value="{{ domain.dkim_private_key_file or '' }}"
+                       placeholder="data/dkim/{{ domain.name }}.private">
+              </div>
+              <div class="field">
+                <label>Селектор</label>
+                <input type="text" name="selector" value="{{ domain.dkim_selector }}">
+              </div>
+              <button type="submit">Сохранить DKIM</button>
+            </div>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted hint">
+    Ключ создаётся командой
+    <code>python manage.py dkim-keygen --domain имя-домена</code>, затем путь
+    указывается здесь. Без ключа письма этого домена уходят без подписи и
+    почти наверняка попадут в спам.
+  </p>
+  {% else %}
+  <p class="muted">Доменов нет. Пока домен не добавлен, нельзя ни завести ящик,
+     ни отправить письмо от имени этого клиента.</p>
+  {% endif %}
+
+  <form method="post" action="/admin/clients/{{ client.id }}/domains">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="row" style="grid-template-columns: 2fr auto">
+      <div class="field">
+        <label for="domain-name">Новый домен</label>
+        <input type="text" id="domain-name" name="name" placeholder="example.kz" required>
+      </div>
+      <button type="submit">Добавить домен</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>API-ключи</h2>
+  {% if keys %}
+  <table>
+    <thead>
+      <tr><th>Название</th><th>Начало ключа</th><th>Создан</th><th>Последнее использование</th><th>Состояние</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for key in keys %}
+      <tr>
+        <td>{{ key.name }}</td>
+        <td><code>{{ key.token_prefix }}…</code></td>
+        <td>{{ key.created_at.strftime("%d.%m.%Y") }}</td>
+        <td>{{ key.last_used_at.strftime("%d.%m.%Y %H:%M") if key.last_used_at else "никогда" }}</td>
+        <td>
+          {% if key.is_active %}<span class="badge">действует</span>
+          {% else %}<span class="badge off">отозван</span>{% endif %}
+        </td>
+        <td style="text-align:right">
+          {% if key.is_active %}
+          <form method="post" action="/admin/keys/{{ key.id }}/revoke" style="margin:0">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="link" type="submit"
+                    data-confirm="Отозвать ключ «{{ key.name }}»? Интеграция, использующая его, перестанет работать.">
+              Отозвать</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">Ключей нет. Без ключа система клиента не сможет обращаться к API.</p>
+  {% endif %}
+
+  <form method="post" action="/admin/clients/{{ client.id }}/keys">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="row" style="grid-template-columns: 2fr auto">
+      <div class="field">
+        <label for="key-name">Название нового ключа</label>
+        <input type="text" id="key-name" name="name" placeholder="Интеграция с CRM">
+      </div>
+      <button type="submit">Выпустить ключ</button>
+    </div>
+  </form>
+  <p class="muted hint">
+    Значение ключа показывается один раз, при выпуске. Восстановить его нельзя —
+    только отозвать и выпустить новый.
+  </p>
+</div>
+
+<p><a href="/admin/clients">← Ко всем клиентам</a></p>
+
+<script>
+  document.querySelectorAll("button[data-confirm]").forEach(function (button) {
+    button.addEventListener("click", function (event) {
+      if (!confirm(button.dataset.confirm)) {
+        event.preventDefault();
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="same-origin">
+  <title>{% block title %}Mail Gateway{% endblock %}</title>
+  <style>
+    :root {
+      --bg: #f5f6f8; --card: #fff; --line: #dfe3e8; --text: #1c2126;
+      --muted: #6b7684; --accent: #2d6cdf; --danger: #c0392b; --ok: #1e8449;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font: 15px/1.5 "Segoe UI", system-ui, sans-serif;
+    }
+    header {
+      background: var(--card); border-bottom: 1px solid var(--line);
+      padding: 14px 24px; display: flex; align-items: center; gap: 16px;
+    }
+    header h1 { font-size: 17px; margin: 0; font-weight: 600; }
+    header .domain { color: var(--muted); font-size: 13px; }
+    header nav { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+    header nav a { color: var(--muted); text-decoration: none; font-size: 14px; }
+    header nav a:hover { color: var(--accent); }
+    main { max-width: 1000px; margin: 24px auto; padding: 0 24px; }
+    .card {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 8px; padding: 20px; margin-bottom: 20px;
+    }
+    .card h2 { font-size: 15px; margin: 0 0 16px; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+    th { font-size: 12px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
+    input[type=text], input[type=email], input[type=password] {
+      padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px;
+      font: inherit; width: 100%; background: #fff;
+    }
+    input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+    button {
+      padding: 8px 16px; border: 0; border-radius: 6px; background: var(--accent);
+      color: #fff; font: inherit; cursor: pointer;
+    }
+    button:hover { filter: brightness(1.08); }
+    button.link {
+      background: none; color: var(--danger); padding: 4px 8px; font-size: 13px;
+    }
+    .row { display: grid; grid-template-columns: 2fr 1.5fr 1fr auto auto; gap: 12px; align-items: end; }
+    .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .checkbox { display: flex; align-items: center; gap: 6px; padding-bottom: 9px; }
+    .checkbox input { width: auto; }
+    .notice { padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+    .notice.error { background: #fdecea; color: var(--danger); }
+    .notice.ok { background: #e8f6ee; color: var(--ok); }
+    .muted { color: var(--muted); }
+    .badge {
+      font-size: 12px; padding: 2px 8px; border-radius: 10px;
+      background: #e8f6ee; color: var(--ok);
+    }
+    .badge.off { background: #eef0f2; color: var(--muted); }
+    select, textarea {
+      padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px;
+      font: inherit; width: 100%; background: #fff;
+    }
+    textarea { resize: vertical; min-height: 200px; }
+    .badge.warn { background: #fdecea; color: var(--danger); }
+    .badge.neutral { background: #eef3fb; color: var(--accent); }
+    a.plain { color: var(--text); text-decoration: none; }
+    a.plain:hover { color: var(--accent); }
+    tr.unread td { font-weight: 600; }
+    .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+    .filters .field { min-width: 130px; }
+    .filters .field.grow { flex: 1; min-width: 200px; }
+    .pager { display: flex; gap: 12px; align-items: center; margin-top: 16px; font-size: 14px; }
+    .pager a { color: var(--accent); text-decoration: none; }
+    .pager a.off { color: var(--muted); pointer-events: none; }
+    .meta { display: grid; grid-template-columns: 140px 1fr; gap: 6px 16px; font-size: 14px; }
+    .meta dt { color: var(--muted); }
+    .meta dd { margin: 0; overflow-wrap: anywhere; }
+    .body-text {
+      white-space: pre-wrap; overflow-wrap: anywhere; margin: 0;
+      font: inherit;
+    }
+    iframe.body-html {
+      width: 100%; min-height: 420px; border: 1px solid var(--line); border-radius: 6px;
+      background: #fff;
+    }
+    .compose .field { margin-bottom: 14px; }
+    .login-wrap { max-width: 360px; margin: 80px auto; }
+    .login-wrap .field { margin-bottom: 14px; }
+    .login-wrap button { width: 100%; }
+    .hint { margin: 14px 0 0; font-size: 13px; }
+  </style>
+</head>
+<body>
+{% if session %}
+<header>
+  <h1>Mail Gateway</h1>
+  <span class="domain">{{ domain }}</span>
+  <nav>
+    <a href="/admin/messages">Почта</a>
+    <a href="/admin/compose">Написать</a>
+    <a href="/admin/">Ящики</a>
+    <a href="/admin/clients">Клиенты</a>
+    <a href="/admin/backup">Копии</a>
+    <a href="/admin/license">Лицензия</a>
+    <a href="/admin/password">Сменить пароль</a>
+    <span class="muted">{{ session.username }}</span>
+    <form method="post" action="/admin/logout" style="margin:0">
+      <button class="link" type="submit">Выйти</button>
+    </form>
+  </nav>
+</header>
+{% endif %}
+<main>
+  {% if error %}<div class="notice error">{{ error }}</div>{% endif %}
+  {% if message %}<div class="notice ok">{{ message }}</div>{% endif %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

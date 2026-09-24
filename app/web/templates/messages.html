@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Почта — Mail Gateway{% endblock %}
+{% block content %}
+
+{#- Строка запроса для ссылок постраничного вывода: фильтры должны переживать
+    переход на следующую страницу, иначе список молча сбрасывается к общему. -#}
+{% macro page_link(new_offset) -%}
+/admin/messages?offset={{ new_offset }}
+{%- for key, value in current.items() %}{% if value %}&{{ key }}={{ value | urlencode }}{% endif %}{% endfor %}
+{%- endmacro %}
+
+<div class="card">
+  <h2>Фильтр</h2>
+  <form method="get" action="/admin/messages" class="filters">
+    <div class="field grow">
+      <label for="search">Поиск</label>
+      <input type="text" id="search" name="search" value="{{ current.search }}"
+             placeholder="тема, отправитель или получатель">
+    </div>
+    <div class="field">
+      <label for="direction">Направление</label>
+      <select id="direction" name="direction">
+        <option value="">любое</option>
+        <option value="incoming" {% if current.direction == "incoming" %}selected{% endif %}>входящие</option>
+        <option value="outgoing" {% if current.direction == "outgoing" %}selected{% endif %}>исходящие</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="status">Состояние</label>
+      <select id="status" name="status">
+        <option value="">любое</option>
+        {% for value in statuses %}
+        <option value="{{ value }}" {% if current.status == value %}selected{% endif %}>{{ value }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="mailbox">Ящик</label>
+      <select id="mailbox" name="mailbox">
+        <option value="">любой</option>
+        {% for box in mailboxes %}
+        <option value="{{ box.address }}" {% if current.mailbox == box.address %}selected{% endif %}>{{ box.address }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="checkbox">
+      <input type="checkbox" id="unread_only" name="unread_only" value="true"
+             {% if current.unread_only %}checked{% endif %}>
+      <label for="unread_only" style="margin:0">Непрочитанные</label>
+    </div>
+    <button type="submit">Показать</button>
+    <a class="plain" href="/admin/messages" style="padding-bottom:9px">Сбросить</a>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Письма — {{ total }}</h2>
+  {% if messages %}
+  <table>
+    <thead>
+      <tr>
+        <th></th><th>Отправитель</th><th>Получатель</th><th>Тема</th>
+        <th>Состояние</th><th>Проверка</th><th>Дата</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in messages %}
+      <tr {% if not item.is_read and not item.is_outgoing %}class="unread"{% endif %}>
+        <td class="muted">{{ "→" if item.is_outgoing else "←" }}</td>
+        <td>{{ item.sender }}</td>
+        <td>{{ item.recipient }}</td>
+        <td>
+          <a class="plain" href="/admin/messages/{{ item.id }}">{{ item.subject or "(без темы)" }}</a>
+          {% if item.attachments %}<span class="muted">📎 {{ item.attachments | length }}</span>{% endif %}
+        </td>
+        <td>
+          {% if item.status in ("failed", "bounced") %}
+            <span class="badge warn" title="{{ item.bounce_diagnostic or item.last_error or '' }}">{{ item.status }}</span>
+          {% elif item.status in ("queued", "sending") %}<span class="badge neutral">{{ item.status }}</span>
+          {% else %}<span class="badge">{{ item.status }}</span>{% endif %}
+        </td>
+        <td>
+          {% if item.is_outgoing %}<span class="muted">—</span>
+          {% elif item.dmarc_result == "fail" or item.spf_result == "fail" %}
+            <span class="badge warn" title="{{ item.auth_results or '' }}">подделка?</span>
+          {% elif item.dmarc_result == "pass" %}<span class="badge">пройдена</span>
+          {% else %}<span class="badge off">{{ item.dmarc_result or "нет" }}</span>{% endif %}
+        </td>
+        <td class="muted">{{ item.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="pager">
+    <a class="{% if offset == 0 %}off{% endif %}"
+       href="{{ page_link(offset - page_size if offset > page_size else 0) }}">← Новее</a>
+    <span class="muted">{{ offset + 1 }}–{{ offset + messages | length }} из {{ total }}</span>
+    <a class="{% if offset + page_size >= total %}off{% endif %}"
+       href="{{ page_link(offset + page_size) }}">Старее →</a>
+  </div>
+  {% else %}
+  <p class="muted">Писем по этому фильтру нет.</p>
+  {% endif %}
+</div>
+{% endblock %}

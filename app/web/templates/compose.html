@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Написать письмо — Mail Gateway{% endblock %}
+{% block content %}
+<div class="card compose">
+  <h2>Новое письмо</h2>
+
+  {% if senders %}
+  <form method="post" action="/admin/compose" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="in_reply_to" value="{{ form.in_reply_to }}">
+
+    <div class="field">
+      <label for="sender">От кого</label>
+      <select id="sender" name="sender" required>
+        {% for box in senders %}
+        <option value="{{ box.address }}" {% if form.sender == box.address %}selected{% endif %}>
+          {{ box.address }}{% if box.display_name %} — {{ box.display_name }}{% endif %}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="recipient">Кому</label>
+      <input type="email" id="recipient" name="recipient" value="{{ form.recipient }}" required>
+    </div>
+
+    <div class="field">
+      <label for="subject">Тема</label>
+      <input type="text" id="subject" name="subject" value="{{ form.subject }}" maxlength="998">
+    </div>
+
+    <div class="field">
+      <label for="body_text">Текст</label>
+      <textarea id="body_text" name="body_text" required>{{ form.body_text }}</textarea>
+    </div>
+
+    <div class="field">
+      <label for="files">Вложения</label>
+      <input type="file" id="files" name="files" multiple>
+    </div>
+
+    <button type="submit">Отправить</button>
+  </form>
+
+  <p class="muted hint">
+    Письмо ставится в очередь, а не уходит немедленно: результат появится в его
+    карточке. Отправитель обязан принадлежать домену {{ domain }} — иначе шлюз
+    работал бы открытым релеем для чужой почты.
+  </p>
+  {% else %}
+  <p class="muted">
+    Нет ни одного активного ящика, а отправлять письмо не от кого.
+    <a href="/admin/">Заведите ящик</a> в домене {{ domain }}.
+  </p>
+  {% endif %}
+</div>
+{% endblock %}

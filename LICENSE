@@ -1,0 +1,147 @@
+Mail Gateway
+Copyright (c) 2026 Valentin Vitalyevich Bortnikov (Бортников Валентин Витальевич),
+individual entrepreneur, trading as "Somnium" (ИП Somnium) — https://somnium.kz
+All rights reserved.
+
+====================================================================
+PROPRIETARY SOURCE-AVAILABLE LICENSE (English)
+====================================================================
+
+1. Ownership. The source code, documentation, images and all other
+   materials in this repository, except for the Third-Party Materials
+   listed in Section 6 (together, the "Software"), are the exclusive
+   property of the copyright holder named above (the "Author") and are
+   protected by the copyright laws of the Republic of Kazakhstan and by
+   international treaties.
+
+2. Permitted use. The Software is published solely to demonstrate the
+   Author's work. You may, free of charge:
+   (a) view and read the Software on GitHub or another platform where
+       the Author has published it;
+   (b) download it and run it on your own computer for the sole purpose
+       of evaluating it or the Author's professional skills (for
+       example, by a prospective employer or client).
+
+3. Prohibited use. Unless you have the Author's prior written
+   permission, you may not:
+   (a) use the Software or any part of it to receive, send, store or
+       process electronic mail in production, for any commercial
+       purpose, or in the provision of services to third parties;
+   (b) copy, modify, translate, adapt, or create derivative works based
+       on the Software or any part of it, including by incorporating
+       its code, algorithms or structure into other software;
+   (c) distribute, publish, sublicense, sell, rent, lease, or otherwise
+       make the Software or any part of it available to third parties,
+       in source or compiled form;
+   (d) remove, alter, disable or circumvent the licensing mechanism
+       (app/services/licensing.py), the signature verification it
+       performs, or any copyright, authorship or license notice.
+   Forking this repository using the functionality of the GitHub
+   platform, to the extent required by the GitHub Terms of Service, is
+   allowed, but it does not grant any right beyond those in Section 2.
+
+4. Licensing requests. For commercial licenses or any use not permitted
+   above, contact the Author via https://somnium.kz.
+
+5. No warranty. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+   NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+   CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN
+   CONNECTION WITH THE SOFTWARE OR ITS USE, INCLUDING ANY LOSS OR
+   NON-DELIVERY OF ELECTRONIC MAIL.
+
+6. Third-Party Materials. This license does not apply to the
+   third-party libraries listed in requirements.txt and
+   requirements-dev.txt. They are distributed under their own licenses
+   and are not included in this repository. In particular, the tray
+   interface uses PySide6 (Qt for Python) under the LGPL v3; in the
+   distributed build Qt is linked dynamically, as the terms of that
+   license require.
+
+7. Commercial product. A separate end-user licence agreement, generated
+   by installer/make_license.py and shipped with the installer, governs
+   the use of the compiled product supplied to customers by the Author.
+   This license governs the source code in this repository only.
+   Neither document grants any right under the other.
+
+8. Termination. Any breach of this license automatically terminates
+   your permissions under Section 2.
+
+9. Governing law. This license is governed by the laws of the Republic
+   of Kazakhstan.
+
+====================================================================
+ПРОПРИЕТАРНАЯ ЛИЦЕНЗИЯ С ОТКРЫТЫМ ДОСТУПОМ К ИСХОДНОМУ КОДУ (Русский)
+====================================================================
+
+1. Принадлежность. Исходный код, документация, изображения и иные
+   материалы этого репозитория, за исключением Материалов третьих лиц,
+   указанных в разделе 6 (далее — «Программа»), являются исключительной
+   собственностью указанного выше правообладателя (далее — «Автор») и
+   охраняются законодательством Республики Казахстан об авторском праве
+   и международными договорами.
+
+2. Разрешённое использование. Программа опубликована исключительно для
+   демонстрации работ Автора. Вы можете безвозмездно:
+   (а) просматривать и читать Программу на GitHub или иной площадке,
+       где её опубликовал Автор;
+   (б) скачивать и запускать её на своём компьютере исключительно для
+       ознакомления с ней или с профессиональными навыками Автора
+       (например, потенциальным работодателем или заказчиком).
+
+3. Запрещённое использование. Без предварительного письменного
+   разрешения Автора запрещается:
+   (а) использовать Программу или любую её часть для приёма, отправки,
+       хранения или обработки электронной почты в промышленной
+       эксплуатации, в коммерческих целях либо при оказании услуг
+       третьим лицам;
+   (б) копировать, изменять, переводить, адаптировать Программу или её
+       части и создавать на их основе производные произведения, в том
+       числе включать её код, алгоритмы или структуру в другие
+       программы;
+   (в) распространять, публиковать, сублицензировать, продавать,
+       сдавать в аренду или иным образом предоставлять Программу или её
+       части третьим лицам в исходном или скомпилированном виде;
+   (г) удалять, изменять, отключать или обходить механизм
+       лицензирования (app/services/licensing.py), выполняемую им
+       проверку подписи, а также уведомления об авторских правах,
+       авторстве и лицензии.
+   Создание форка средствами платформы GitHub в объёме, предусмотренном
+   Условиями использования GitHub, допускается, но не предоставляет
+   никаких прав сверх указанных в разделе 2.
+
+4. Получение лицензии. По вопросам коммерческой лицензии и любого
+   использования, не разрешённого выше, обращайтесь к Автору через
+   https://somnium.kz.
+
+5. Отказ от гарантий. ПРОГРАММА ПРЕДОСТАВЛЯЕТСЯ «КАК ЕСТЬ», БЕЗ КАКИХ-
+   ЛИБО ГАРАНТИЙ, ЯВНЫХ ИЛИ ПОДРАЗУМЕВАЕМЫХ. АВТОР НЕ НЕСЁТ
+   ОТВЕТСТВЕННОСТИ ЗА ЛЮБЫЕ ПРЕТЕНЗИИ, УБЫТКИ ИЛИ ИНУЮ
+   ОТВЕТСТВЕННОСТЬ, ВОЗНИКАЮЩИЕ ИЗ ПРОГРАММЫ, ЕЁ ИСПОЛЬЗОВАНИЯ ИЛИ В
+   СВЯЗИ С НИМИ, В ТОМ ЧИСЛЕ ЗА УТРАТУ ИЛИ НЕДОСТАВКУ ЭЛЕКТРОННОЙ
+   ПОЧТЫ.
+
+6. Материалы третьих лиц. Настоящая лицензия не распространяется на
+   сторонние библиотеки, перечисленные в requirements.txt и
+   requirements-dev.txt: они распространяются по собственным лицензиям
+   и не входят в этот репозиторий. В частности, интерфейс в трее
+   использует PySide6 (Qt for Python) по лицензии LGPL v3; в
+   поставляемой сборке Qt подключается динамически, как того требуют
+   условия этой лицензии.
+
+7. Коммерческий продукт. Использование скомпилированного продукта,
+   поставляемого Автором заказчикам, регулируется отдельным
+   лицензионным соглашением, которое создаётся файлом
+   installer/make_license.py и прилагается к установщику. Настоящая
+   лицензия регулирует только исходный код в этом репозитории. Ни один
+   из документов не предоставляет прав по другому.
+
+8. Прекращение. Любое нарушение настоящей лицензии автоматически
+   прекращает права, предоставленные разделом 2.
+
+9. Применимое право. Настоящая лицензия регулируется законодательством
+   Республики Казахстан.
+
+При расхождении текстов на русском и английском языках приоритет имеет
+текст на русском языке.

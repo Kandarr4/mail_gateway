@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Вход — Mail Gateway{% endblock %}
+{% block content %}
+<div class="login-wrap">
+  <div class="card">
+    <h2>Вход в панель управления</h2>
+    <form method="post" action="/admin/login">
+      <div class="field">
+        <label for="username">Имя пользователя</label>
+        <input type="text" id="username" name="username" autocomplete="username" autofocus required>
+      </div>
+      <div class="field">
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit">Войти</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

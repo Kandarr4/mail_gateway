@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}{{ message.subject or "Письмо" }} — Mail Gateway{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>{{ message.subject or "(без темы)" }}</h2>
+  <dl class="meta">
+    <dt>От</dt><dd>{{ message.sender }}</dd>
+    <dt>Кому</dt><dd>{{ message.recipient }}</dd>
+    <dt>Дата</dt><dd>{{ message.created_at.strftime("%d.%m.%Y %H:%M:%S") }}</dd>
+    <dt>Направление</dt><dd>{{ "исходящее" if message.is_outgoing else "входящее" }}</dd>
+    <dt>Состояние</dt>
+    <dd>
+      {% if message.status == "failed" %}<span class="badge warn">{{ message.status }}</span>
+      {% else %}<span class="badge">{{ message.status }}</span>{% endif %}
+      {% if message.is_outgoing and message.attempts %}
+      <span class="muted">попыток: {{ message.attempts }}</span>
+      {% endif %}
+    </dd>
+    {% if message.sent_at %}
+    <dt>Отправлено</dt><dd>{{ message.sent_at.strftime("%d.%m.%Y %H:%M:%S") }}</dd>
+    {% endif %}
+    {% if message.last_error %}
+    <dt>Ошибка</dt><dd class="muted">{{ message.last_error }}</dd>
+    {% endif %}
+    {% if message.bounced_at %}
+    <dt>Отчёт о доставке</dt>
+    <dd>
+      <span class="badge warn">{{ message.bounce_status or "отказ" }}</span>
+      {{ message.bounced_at.strftime("%d.%m.%Y %H:%M") }}
+      {% if message.bounce_diagnostic %}
+      <div class="muted" style="margin-top:4px">{{ message.bounce_diagnostic }}</div>
+      {% endif %}
+    </dd>
+    {% endif %}
+    <dt>Message-ID</dt><dd class="muted">{{ message.message_id or "—" }}</dd>
+  </dl>
+</div>
+
+{% if not message.is_outgoing %}
+<div class="card">
+  <h2>Подлинность отправителя</h2>
+  <dl class="meta">
+    <dt>SPF</dt><dd>{{ message.spf_result or "не проверялся" }}</dd>
+    <dt>DKIM</dt><dd>{{ message.dkim_result or "не проверялся" }}</dd>
+    <dt>DMARC</dt><dd>{{ message.dmarc_result or "не проверялся" }}</dd>
+  </dl>
+  {% if message.spf_result == "fail" or message.dmarc_result == "fail" %}
+  <p class="notice error" style="margin:16px 0 0">
+    Проверка не пройдена: адрес в поле «От» мог быть подделан. Не доверяйте
+    содержимому и не переходите по ссылкам из этого письма.
+  </p>
+  {% elif not message.dmarc_result %}
+  <p class="muted hint">
+    Письмо принято без проверки — она была выключена или недоступна в этот момент.
+  </p>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>Текст</h2>
+  {% if message.body_text %}
+  <p class="body-text">{{ message.body_text }}</p>
+  {% elif message.body_html %}
+  <p class="muted hint" style="margin-top:0">
+    Текстовой части нет — ниже показано HTML-представление в изолированном виде.
+  </p>
+  {% else %}
+  <p class="muted">Письмо без текста.</p>
+  {% endif %}
+
+  {% if message.body_html %}
+  <h2 style="margin-top:24px">HTML</h2>
+  {#- Тело письма пишет отправитель, поэтому оно живёт в отдельном документе за
+      sandbox: без allow-scripts и без allow-same-origin скрипты в нём не
+      выполняются и до сессии панели не добираются. Менять этот атрибут нельзя. -#}
+  <iframe class="body-html" sandbox src="/admin/messages/{{ message.id }}/body"
+          title="HTML-содержимое письма"></iframe>
+  <p class="muted hint">
+    Внешние картинки и скрипты во фрейме заблокированы: иначе загрузка картинки
+    подтвердила бы отправителю, что письмо прочитали.
+  </p>
+  {% endif %}
+</div>
+
+{% if message.attachments %}
+<div class="card">
+  <h2>Вложения — {{ message.attachments | length }}</h2>
+  <table>
+    <tbody>
+      {% for file in message.attachments %}
+      <tr>
+        <td><a class="plain" href="/admin/attachments/{{ file.id }}">{{ file.filename }}</a></td>
+        <td class="muted">{{ file.content_type or "—" }}</td>
+        <td class="muted">{{ (file.size / 1024) | round | int }} КБ</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted hint">
+    Вложения отдаются только на скачивание и не открываются браузером —
+    вложенный HTML исполнялся бы в контексте панели.
+  </p>
+</div>
+{% endif %}
+
+<div class="card">
+  <a class="plain" href="/admin/messages">← К списку</a>
+  <a href="/admin/compose?reply_to={{ message.id }}" style="margin-left:16px">Ответить</a>
+</div>
+{% endblock %}

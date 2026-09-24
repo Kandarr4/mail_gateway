@@ -1,0 +1,20 @@
+-r requirements.txt
+pytest>=8.3
+pytest-asyncio>=0.25
+httpx>=0.28
+cryptography>=44.0
+ruff>=0.8
+# Сборка документов .docx (make_docs.bat). В работе шлюза не участвует.
+python-docx>=1.1
+# Монитор в трее (запускается из run.bat) и генерация значка. Службе не нужны.
+#
+# Именно PySide6, а НЕ PyQt5: PyQt5 распространяется под GPL v3, и его
+# включение в поставку обязывало бы открыть исходный код всего продукта.
+# PySide6 — LGPL: проприетарная поставка допустима, пока Qt подключается
+# динамически (в сборке PyInstaller так и есть — Qt6*.dll лежат рядом).
+# Essentials, а не полный PySide6: Addons (WebEngine, Charts, 3D) тянут
+# сотни мегабайт, из которых трею не нужно ничего.
+PySide6-Essentials>=6.8
+Pillow>=10.0
+# Сборка поставляемого каталога (build.py + mail_gateway.spec).
+pyinstaller>=6.0
