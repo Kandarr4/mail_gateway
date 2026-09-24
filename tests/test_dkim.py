@@ -135,7 +135,7 @@ def test_missing_key_file_is_a_permanent_error(tmp_path):
 def test_broken_key_fails_loudly(tmp_path):
     """Негодный ключ — ошибка подписи, а не молчаливое письмо без неё."""
     bad = tmp_path / "bad.private"
-    bad.write_text("это не ключ")
+    bad.write_text("это не ключ", encoding="utf-8")
     domain = Domain(name=DOMAIN, dkim_selector=SELECTOR, dkim_private_key_file=str(bad))
 
     with pytest.raises(DkimError):
