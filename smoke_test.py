@@ -22,6 +22,9 @@ os.environ.update(
     MG_API_TOKENS="test-token",
     MG_DATABASE_URL=f"sqlite:///{TMP / 'smoke.db'}",
     MG_ATTACHMENT_DIR=str(TMP / "attachments"),
+    # Как в tests/conftest.py: на площадке PROXY protocol бывает включён в .env,
+    # а проверка подключается к SMTP напрямую, без заголовка.
+    MG_PROXY_PROTOCOL="false",
 )
 
 
@@ -29,8 +32,8 @@ def _issue_temporary_license() -> None:
     """Свежая лицензия на время проверки — во временном каталоге.
 
     Без действующей лицензии сервер не поднимается вовсе, а проверять сборку
-    боевым файлом заказчика незачем: подменяем открытый ключ на свой (тот же
-    механизм, что у тестов; в поставляемой сборке он отключён) и выписываем
+    боевым файлом заказчика незачем: подменяем открытый ключ в модуле
+    лицензирования на свой (так же, как тесты) и выписываем
     однодневную лицензию рядом с временной базой. Настоящий `license.lic` в
     корне развёртывания при этом не читается и не трогается.
     """
@@ -41,12 +44,13 @@ def _issue_temporary_license() -> None:
     from cryptography.hazmat.primitives import hashes, serialization
     from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
+    from app.services import licensing
+
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    pem = key.public_key().public_bytes(
+    licensing._PUBLIC_KEY_PEM = key.public_key().public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo,
-    ).decode()
-    os.environ["LICENSE_PUBLIC_KEY"] = pem.replace("\n", "\\n")
+    )
 
     now = datetime.now()
     payload = json.dumps({
@@ -63,8 +67,6 @@ def _issue_temporary_license() -> None:
         padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH),
         hashes.SHA256(),
     )
-
-    from app.services import licensing
 
     licensing.LICENSE_FILE = TMP / "license.lic"
     licensing.LICENSE_FILE.write_bytes(base64.b64encode(payload + signature))

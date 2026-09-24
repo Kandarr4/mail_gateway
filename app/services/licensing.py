@@ -27,9 +27,7 @@ import base64
 import binascii
 import json
 import logging
-import os
 import shutil
-import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime
@@ -46,11 +44,10 @@ LICENSING_URL = "https://somnium.kz/licensing"
 #: Длина подписи RSA-2048 в байтах — столько отрезается с конца файла.
 _SIGNATURE_LEN = 256
 
-#: Публичный ключ сервера лицензирования Somnium. В запуске из исходников
-#: переопределяется переменной LICENSE_PUBLIC_KEY (PEM с \n вместо переводов
-#: строк) — этим живут тесты и стенд с тестовым сервером лицензирования. В
-#: поставляемой сборке переменная игнорируется: раз лицензия обязательна,
-#: подмена ключа окружением была бы способом выписать её себе самому.
+#: Публичный ключ сервера лицензирования Somnium. Подменить его можно только в
+#: коде: тесты присваивают `_PUBLIC_KEY_PEM` своего ключа. Переменной окружения
+#: для этого нет намеренно — через неё лицензию можно было бы выписать себе
+#: самому, а исходники проекта открыты.
 _PUBLIC_KEY_PEM = b"""-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoThntrmotEYtNtaRBz4o
 ZhXXVjakqK49HyGN5Gcf/GDgWv9G7Pb2xNu28Mzz551DKqfdJ02YS3WaINv57FBV
@@ -108,9 +105,7 @@ class LicenseStatus:
 def _public_key():
     from cryptography.hazmat.primitives import serialization
 
-    pem = "" if getattr(sys, "frozen", False) else os.environ.get("LICENSE_PUBLIC_KEY", "")
-    raw = pem.replace("\\n", "\n").encode() if pem else _PUBLIC_KEY_PEM
-    return serialization.load_pem_public_key(raw)
+    return serialization.load_pem_public_key(_PUBLIC_KEY_PEM)
 
 
 def verify_file(path: Path) -> LicenseStatus:

@@ -74,16 +74,16 @@ AUTH = {"Authorization": "Bearer token-a"}
 # идёт с действующей лицензией — как в бою; отсутствие лицензии проверяется
 # точечно в test_licensing.py, там же файл подменяется на свой.
 #
-# Ключ подписи — собственный, подставленный тем же механизмом, что
-# предусмотрен для тестового сервера лицензирования. В собранном приложении
-# переменная LICENSE_PUBLIC_KEY игнорируется (см. licensing._public_key).
+# Ключ подписи — собственный: его публичная половина подставляется прямо в
+# модуль лицензирования. Переменной окружения для подмены ключа нет
+# намеренно (см. licensing._PUBLIC_KEY_PEM).
 
 LICENSE_KEY = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
-os.environ["LICENSE_PUBLIC_KEY"] = LICENSE_KEY.public_key().public_bytes(
+licensing._PUBLIC_KEY_PEM = LICENSE_KEY.public_key().public_bytes(
     encoding=serialization.Encoding.PEM,
     format=serialization.PublicFormat.SubjectPublicKeyInfo,
-).decode().replace("\n", "\\n")
+)
 
 
 def make_license(path, *, days=365, max_domains=3, program_id="mail-gateway",
