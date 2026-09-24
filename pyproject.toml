@@ -66,6 +66,9 @@ ignore = ["B008", "E501", "N818", "RUF001", "RUF002", "RUF003"]
 "tray/app.py" = ["S606"]
 
 [tool.pytest.ini_options]
+# Корень проекта в sys.path явно: `python -m pytest` добавляет его сам, а просто
+# `pytest` (как в CI) — нет, и тесты падали на «No module named app».
+pythonpath = ["."]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
