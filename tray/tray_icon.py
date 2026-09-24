@@ -157,7 +157,7 @@ class ServiceProbe:
         """`/ready` отвечает без токена — трею не нужны секреты."""
         url = f"http://127.0.0.1:{self.api_port}/api/v1/ready"
         try:
-            with urllib.request.urlopen(url, timeout=1.5) as response:  # noqa: S310 — адрес собран выше: http на 127.0.0.1
+            with urllib.request.urlopen(url, timeout=1.5) as response:
                 data = json.loads(response.read().decode("utf-8"))
         except Exception:  # noqa: BLE001 — любой сбой опроса означает «не отвечает»
             return "не отвечает", COLORS["danger"]

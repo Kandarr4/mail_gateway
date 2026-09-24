@@ -34,6 +34,8 @@ dependencies = { file = ["requirements.txt"] }
 packages = ["app", "app.api", "app.api.routes", "app.services", "app.web", "app.workers", "tray"]
 
 [tool.ruff]
+# Другая версия ruff упадёт с понятным сообщением, а не выдаст молча другой результат.
+required-version = "==0.16.8"
 line-length = 110
 target-version = "py311"
 

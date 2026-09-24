@@ -253,7 +253,7 @@ def _check_one(record: Record) -> Checked:
     except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
         # «Такого имени нет» — это ответ, а не сбой связи: запись не добавлена.
         return Checked(record, MISSING)
-    except Exception:  # noqa: BLE001 — таймаут, нет сети, кривой резолвер
+    except Exception:  # таймаут, нет сети, кривой резолвер
         logger.debug("Проверка DNS не удалась: %s %s", record.type, record.fqdn, exc_info=True)
         return Checked(record, UNKNOWN)
 
